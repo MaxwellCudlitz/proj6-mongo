@@ -37,10 +37,16 @@
 {% endwith %}
 
 <h1>Memos</h1>
+<form id="new_memo">
+  <h3>Make a new memo:</h3>
+  <input type="text" name = "memo"> 
+  <input type="date" name = "date"> 
+  <input type="submit">
+</form>
 
 {% if g.memos %}
     {% for memo in g.memos %}
-  <div class="memo">
+  <div class="memo" style="border: thin solid black">
   <div class="row">
   <div class="col-md-2">
     {{ memo.date | humanize }}
@@ -54,6 +60,22 @@
 {% else %}
   <p>No memos for you. </p>  
 {% endif %}
+
+<script>
+
+  $(function(){
+    $('#new_memo').submit(function(e){
+      $.ajax({
+        type : "POST", 
+        url : "/_create_memo",
+        success : function(data){
+          g.memos = data;
+        }
+      })
+    });
+  });
+ 
+</script>
 
  
 

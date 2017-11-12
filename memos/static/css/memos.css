@@ -5,6 +5,12 @@
 
 /* Nothing yet */
 
+.memo {
+	border-size:2px;
+	border-style:solid;
+	border-color:black;
+}
+
 .lyrics {
     margin-left: 3em;
     font-style: italic;

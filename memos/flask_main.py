@@ -17,6 +17,7 @@ from flask import g
 from flask import render_template
 from flask import request
 from flask import url_for
+from flask import redirect
 
 import json
 import logging
@@ -74,18 +75,33 @@ except:
 @app.route("/")
 @app.route("/index")
 def index():
+
+  #otherwise render page
   app.logger.debug("Main page entry")
+
+  # sort dates
   g.memos = get_memos()
+  #g.memos.sort(key=lambda m: arrow.get(m['date']))
+
   for memo in g.memos: 
       app.logger.debug("Memo: " + str(memo))
+
   return flask.render_template('index.html')
 
 
-# We don't have an interface for creating memos yet
-# @app.route("/create")
-# def create():
-#     app.logger.debug("Create")
-#     return flask.render_template('create.html')
+@app.route("/_create_memo", methods=['POST'])
+def create_memo():
+    """creates a new memo, inserts it into mongo, and reflashes page"""
+    form = request.form
+    date = form['date']
+    memo = form['memo']
+    record = {
+        "type": "dated_memo",
+        "date": str(arrow.get(date)),
+        "text": memo
+    }
+    collection.insert(record)
+    return flask.jsonify(get_memos())
 
 
 @app.errorhandler(404)
@@ -104,12 +120,6 @@ def page_not_found(error):
 
 @app.template_filter( 'humanize' )
 def humanize_arrow_date( date ):
-    """
-    Date is internal UTC ISO format string.
-    Output should be "today", "yesterday", "in 5 days", etc.
-    Arrow will try to humanize down to the minute, so we
-    need to catch 'today' as a special case. 
-    """
     try:
         then = arrow.get(date).to('local')
         now = arrow.utcnow().to('local')
@@ -134,11 +144,12 @@ def get_memos():
     Returns all memos in the database, in a form that
     can be inserted directly in the 'session' object.
     """
-    records = [ ]
+    records = []
     for record in collection.find( { "type": "dated_memo" } ):
         record['date'] = arrow.get(record['date']).isoformat()
-        del record['_id']
+        #del record['_id']
         records.append(record)
+    records.sort(key=lambda m: arrow.get(m['date']))
     return records 
 
 
