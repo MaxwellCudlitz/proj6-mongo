@@ -91,7 +91,7 @@ def index():
 
 @app.route("/_create_memo", methods=['POST'])
 def create_memo():
-    """creates a new memo, inserts it into mongo, and reflashes page"""
+    """creates a new memo, inserts it into mongo, and returns JSON"""
     form = request.form
     date = form['date']
     memo = form['memo']
@@ -100,7 +100,7 @@ def create_memo():
         "date": str(arrow.get(date)),
         "text": memo
     }
-    collection.insert(record)
+    # collection.insert(record)
     return flask.jsonify(get_memos())
 
 
@@ -147,7 +147,7 @@ def get_memos():
     records = []
     for record in collection.find( { "type": "dated_memo" } ):
         record['date'] = arrow.get(record['date']).isoformat()
-        #del record['_id']
+        record['_id'] = str(record['_id'])
         records.append(record)
     records.sort(key=lambda m: arrow.get(m['date']))
     return records 

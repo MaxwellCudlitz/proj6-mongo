@@ -26,7 +26,7 @@
 <div class="container">
 
 <!-- Flashed messages before content -->
-{% with messages = get_flashed_messages() %}
+<!-- {% with messages = get_flashed_messages() %}
   {% if messages %}
     <ul class=flashes>
     {% for message in messages %}
@@ -34,17 +34,23 @@
     {% endfor %}
     </ul>
   {% endif %}
-{% endwith %}
+{% endwith %} -->
 
-<h1>Memos</h1>
+<h3>Make a new memo:</h3>
+<input type="text" name = "memo" id = "memo" value = "memo"> 
+<input type="date" name = "date" id = "date" value = "mm/dd/yy"> 
+<input type="button" name = "submit_memo" id = "submit_memo" value = "save memo">
+
+<div id = "memo_list" />
+<!-- <h1>Memos</h1>
 <form id="new_memo">
   <h3>Make a new memo:</h3>
   <input type="text" name = "memo"> 
   <input type="date" name = "date"> 
   <input type="submit">
-</form>
+</form> -->
 
-{% if g.memos %}
+<!-- {% if g.memos %}
     {% for memo in g.memos %}
   <div class="memo" style="border: thin solid black">
   <div class="row">
@@ -54,28 +60,82 @@
   <div class="col-md-10">
     {{ memo.text }}
   </div>
-  </div> <!-- row -->
-  </div> <!-- memo -->
+  </div>
+  </div>
   {% endfor %}
 {% else %}
   <p>No memos for you. </p>  
 {% endif %}
+-->
 
 <script>
 
-  $(function(){
-    $('#new_memo').submit(function(e){
-      $.ajax({
-        type : "POST", 
-        url : "/_create_memo",
-        success : function(data){
-          g.memos = data;
-        }
-      })
+  $(document).ready(function(){
+
+    // call postMemo with contents of the
+    // fields above when the submit button
+    // is clicked
+    $("#submit_memo").click(function(e){
+      e.preventDefault();
+      postMemo({
+        "memo" : $("#memo").val(),
+        "date" : $("#date").val()
+      });
     });
   });
+
+  // inserts the passed memo into the database
+  // the query will asynchronously update the 
+  // memos within the document upon insertion.
+  function postMemo(memo){
+    return $.ajax({
+     type : "POST",
+     url  : "_create_memo",
+     data : memo,
+
+     // update memos in view
+     success : function(res){
+      drawMemos(res);
+     }
+    });
+
+    // var memoTemplate = $('script[data-template="listitem"]').text().split(/\$\{(.+?)\}/g);
+
+    // function render(props) {
+    //   return function(tok, i) { return (i % 2) ? props[tok] : tok; };
+    // }
+
+    function drawMemos(res){
+      $("#memo_list").html([
+        { url: '/foo', img: 'foo.png', title: 'Foo item' },
+        { url: '/bar', img: 'bar.png', title: 'Bar item' },
+      ].map(Item).join(''));
+      console.log(res);
+    }
+  }
+
+  const Item = ({ url, img, title }) => `
+    <a href="${url}" class="list-group-item">
+      <div class="image">
+        <img src="${img}" />
+      </div>
+      <p class="list-group-item-text">${title}</p>
+    </a>
+  `;
  
 </script>
+
+<!-- script pseudotemplate for inserting memoss -->
+<!-- <script type="text/template" data-template="listitem">
+  <a href="${url}" class="list-group-item">
+      <table>
+          <tr>
+              <td><img src="${img}"></td>
+              <td><p class="list-group-item-text">${title}</p></td>
+          </tr>
+      </table>
+  </a>
+</script> -->
 
  
 
