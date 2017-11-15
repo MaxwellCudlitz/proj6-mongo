@@ -25,52 +25,27 @@
 <body>
 <div class="container">
 
-<!-- Flashed messages before content -->
-<!-- {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %} -->
-
 <h3>Make a new memo:</h3>
 <input type="text" name = "memo" id = "memo" value = "memo"> 
 <input type="date" name = "date" id = "date" value = "mm/dd/yy"> 
 <input type="button" name = "submit_memo" id = "submit_memo" value = "save memo">
 
 <div id = "memo_list" />
-<!-- <h1>Memos</h1>
-<form id="new_memo">
-  <h3>Make a new memo:</h3>
-  <input type="text" name = "memo"> 
-  <input type="date" name = "date"> 
-  <input type="submit">
-</form> -->
-
-<!-- {% if g.memos %}
-    {% for memo in g.memos %}
-  <div class="memo" style="border: thin solid black">
-  <div class="row">
-  <div class="col-md-2">
-    {{ memo.date | humanize }}
-  </div>
-  <div class="col-md-10">
-    {{ memo.text }}
-  </div>
-  </div>
-  </div>
-  {% endfor %}
-{% else %}
-  <p>No memos for you. </p>  
-{% endif %}
--->
 
 <script>
 
   $(document).ready(function(){
+
+    // retrieve + draw current memos on
+    // page load.
+    $.ajax({
+      type : "GET",
+      url : "_retrieve_memos",
+      success : function(res){
+        drawMemos(res);
+        console.log("called retrieve memos")
+      }
+    });
 
     // call postMemo with contents of the
     // fields above when the submit button
@@ -98,46 +73,35 @@
       drawMemos(res);
      }
     });
-
-    // var memoTemplate = $('script[data-template="listitem"]').text().split(/\$\{(.+?)\}/g);
-
-    // function render(props) {
-    //   return function(tok, i) { return (i % 2) ? props[tok] : tok; };
-    // }
-
-    function drawMemos(res){
-      $("#memo_list").html([
-        { url: '/foo', img: 'foo.png', title: 'Foo item' },
-        { url: '/bar', img: 'bar.png', title: 'Bar item' },
-      ].map(Item).join(''));
-      console.log(res);
-    }
   }
 
-  const Item = ({ url, img, title }) => `
-    <a href="${url}" class="list-group-item">
-      <div class="image">
-        <img src="${img}" />
-      </div>
-      <p class="list-group-item-text">${title}</p>
-    </a>
-  `;
+  // Draws returned memos from AJAX query, synchronizing
+  // the client's view with the database
+  function drawMemos(res){
+
+    // renders the memo list as formatted HTML using the
+    // MEMOTEMPLATE ECMAS5 template.then unifies the individual HTML elements
+    $("#memo_list").html(
+
+      // maps JSON response to MEMOTEMPLATE, then joins
+      // array elements into a single HTML string.
+      res.map((text, date, id) => {
+        return MEMOTEMPLATE(text, date, id);
+      }).join('')
+    );
+  }
+
+  // template for rendering memos in the view.
+  const MEMOTEMPLATE = ({text, date, id}) => {
+    return `
+        <div class = "list-group-item memo">
+          <p class = "memo-date">${date}</p>
+          <h3 class = "memo-text">${text}</h3>
+        </div>
+      `
+    };
  
 </script>
-
-<!-- script pseudotemplate for inserting memoss -->
-<!-- <script type="text/template" data-template="listitem">
-  <a href="${url}" class="list-group-item">
-      <table>
-          <tr>
-              <td><img src="${img}"></td>
-              <td><p class="list-group-item-text">${title}</p></td>
-          </tr>
-      </table>
-  </a>
-</script> -->
-
- 
 
 </div> <!-- container -->
 </body>
