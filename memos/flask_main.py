@@ -30,6 +30,7 @@ from dateutil import tz  # For interpreting local times
 
 # Mongo database
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
 import config
 CONFIG = config.configuration()
@@ -75,12 +76,24 @@ except:
 @app.route("/")
 @app.route("/index")
 def index():
-
   app.logger.debug("Main page entry")
-#   g.memos = get_memos()
-#   for memo in g.memos: 
-#       app.logger.debug("Memo: " + str(memo))
   return flask.render_template('index.html')
+
+@app.route("/_delete_memo", methods=['POST'])
+def delete_memo():
+    """
+    Deletes the memo with the passed unique
+    identifier, and returns the current JSON
+    memo list as JSON.
+    """
+   
+    form = request.form
+    uid  = form['id']
+
+    print(uid)
+
+    collection.remove({'_id' : ObjectId(uid)})
+    return retrieve_formatted_json_memos()
 
 
 @app.route("/_create_memo", methods=['POST'])
@@ -149,7 +162,6 @@ def humanize_arrow_date( date ):
     except: 
         human = date
 
-    print(human)
     return human
 
 

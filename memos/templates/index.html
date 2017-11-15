@@ -57,49 +57,62 @@
         "date" : $("#date").val()
       });
     });
+
+    // calls deleteMemo with the name of the button
+    // that called, which is the memo's ID.
+    $("#memo_list").on("click", ".memo-delete-button", function(e){
+      e.preventDefault();
+      deleteMemo($(this).attr('name'));
+    });
   });
 
   // inserts the passed memo into the database
   // the query will asynchronously update the 
   // memos within the document upon insertion.
   function postMemo(memo){
-    return $.ajax({
-     type : "POST",
-     url  : "_create_memo",
-     data : memo,
+    $.ajax({
+      type : "POST",
+      url  : "_create_memo",
+      data : memo,
+      success : function(res){
+        drawMemos(res);
+      }
+    });
+  }
 
-     // update memos in view
-     success : function(res){
-      drawMemos(res);
-     }
+  // delete memo with the ID passed, and refreshes
+  // memos from the Database.
+  function deleteMemo(id){
+    $.ajax({
+      type : "POST",
+      url  : "_delete_memo",
+      data : {"id" : id},
+      success : function(res){
+        drawMemos(res);
+      }
     });
   }
 
   // Draws returned memos from AJAX query, synchronizing
-  // the client's view with the database
+  // the client's view with the database. 
   function drawMemos(res){
-
-    // renders the memo list as formatted HTML using the
-    // MEMOTEMPLATE ECMAS5 template.then unifies the individual HTML elements
     $("#memo_list").html(
-
-      // maps JSON response to MEMOTEMPLATE, then joins
-      // array elements into a single HTML string.
-      res.map((text, date, id) => {
-        return MEMOTEMPLATE(text, date, id);
-      }).join('')
+      res.map(MEMOTEMPLATE).join('')
     );
   }
 
   // template for rendering memos in the view.
-  const MEMOTEMPLATE = ({text, date, id}) => {
+  // by performing string interpolation on a partial
+  // HTML element
+  const MEMOTEMPLATE = ({text, date, _id}) => {
     return `
         <div class = "list-group-item memo">
           <p class = "memo-date">${date}</p>
           <h3 class = "memo-text">${text}</h3>
+          <input type = button class = "memo-delete-button" name = ${_id} value = "delete memo" />
         </div>
       `
-    };
+  };
  
 </script>
 
