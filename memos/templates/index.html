@@ -107,9 +107,9 @@
   const MEMOTEMPLATE = ({text, date, _id}) => {
     return `
         <div class = "list-group-item memo">
+          <input type = button class = "memo-delete-button pull-right" name = ${_id} value = "delete memo" />
           <p class = "memo-date">${date}</p>
           <h3 class = "memo-text">${text}</h3>
-          <input type = button class = "memo-delete-button" name = ${_id} value = "delete memo" />
         </div>
       `
   };

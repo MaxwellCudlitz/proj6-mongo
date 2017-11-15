@@ -90,9 +90,9 @@ def delete_memo():
     form = request.form
     uid  = form['id']
 
-    print(uid)
+    delete = collection.remove({'_id' : ObjectId(uid)})
+    app.logger.debug(delete)
 
-    collection.remove({'_id' : ObjectId(uid)})
     return retrieve_formatted_json_memos()
 
 
@@ -111,7 +111,9 @@ def create_memo():
         "date": arrow.get(date).naive,
         "text": memo
     }
-    collection.insert(record)
+    insert = collection.insert(record)
+    app.logger.debug(insert)
+
     return retrieve_formatted_json_memos()
 
 @app.route("/_retrieve_memos", methods=['GET'])
@@ -184,7 +186,7 @@ def get_memos():
         # ID types do not play well with flask.jsonify().
         record['_id'] = str(record['_id'])
         records.append(record)
-    records.sort(key=lambda m: arrow.get(m['date']))
+    records.sort(key=lambda m: arrow.get(m['date']), reverse = True)
     return records 
 
 

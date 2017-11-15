@@ -11,6 +11,13 @@
 	border-color:black;
 }
 
+.list-group-item{
+    overflow : hidden;
+}
+.memo-delete-button{
+    float : right;
+}
+
 .lyrics {
     margin-left: 3em;
     font-style: italic;
